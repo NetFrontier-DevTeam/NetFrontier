@@ -1,0 +1,6 @@
+<Project>
+  <Target Name="CopyDlls" AfterTargets="Build">
+    <Copy SourceFiles="$(TargetDir)MySql.Data.dll" DestinationFolder="C:\Users\grace\Net Frontier\Assets\Plugins\lib\" />
+    <Copy SourceFiles="$(TargetDir)Google.Protobuf.dll" DestinationFolder="C:\Users\grace\Net Frontier\Assets\Plugins\lib\" />
+  </Target>
+</Project>

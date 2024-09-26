@@ -1,0 +1,8 @@
+{
+  "Database": {
+    "Server": "localhost",
+    "DatabaseName": "netfrontier_db",
+    "UserId": "netfrontier_admin",
+    "Password": "@2027Clean"
+  }
+}
