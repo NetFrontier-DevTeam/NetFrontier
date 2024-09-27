@@ -3,6 +3,6 @@
     "Server": "localhost",
     "DatabaseName": "netfrontier_db",
     "UserId": "netfrontier_admin",
-    "Password": "@2027Clean"
+    "Password": "********" // if your using a localhost use whatever your db pw is.
   }
 }
