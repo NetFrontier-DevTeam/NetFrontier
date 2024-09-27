@@ -1,7 +1,9 @@
 using System;
 using System.IO;
+using System.Net.NetworkInformation; // Using System's Ping
 using MySql.Data.MySqlClient;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class DatabaseManager : MonoBehaviour
 {
@@ -23,26 +25,23 @@ public class DatabaseManager : MonoBehaviour
         public DatabaseSettings Database;
     }
 
+    public Text loginMessageText; // Text component for displaying login message
+    public Text pingMessageText; // Text component for displaying ping messages
+
     void Start()
     {
         try
         {
             LoadDatabaseConfig(); // Load configuration on start
-            if (connection != null)
+            OpenConnection();
+            if (connection != null && connection.State == System.Data.ConnectionState.Open)
             {
-                OpenConnection();
-                if (connection.State == System.Data.ConnectionState.Open)
-                {
-                    Debug.Log("Database connection successful!");
-                }
-                else
-                {
-                    Debug.LogError("Database connection failed to open.");
-                }
+                Debug.Log("Database connection successful!");
+                StartPing("127.0.0.1"); // Replace with your server IP
             }
             else
             {
-                Debug.LogError("Database connection is not initialized.");
+                Debug.LogError("Database connection failed to open.");
             }
         }
         catch (Exception ex)
@@ -96,7 +95,7 @@ public class DatabaseManager : MonoBehaviour
         }
     }
 
-    // Example: Method for user registration
+    // Method for user registration
     public void RegisterUser(string username, string password)
     {
         if (connection == null || connection.State != System.Data.ConnectionState.Open)
@@ -116,7 +115,7 @@ public class DatabaseManager : MonoBehaviour
         }
     }
 
-    // Example: Method for user login
+    // Method for user login
     public bool LoginUser(string username, string password)
     {
         if (connection == null || connection.State != System.Data.ConnectionState.Open)
@@ -132,7 +131,63 @@ public class DatabaseManager : MonoBehaviour
             cmd.Parameters.AddWithValue("@username", username);
             cmd.Parameters.AddWithValue("@password", password);
             int count = Convert.ToInt32(cmd.ExecuteScalar());
-            return count > 0;
+
+            if (count > 0)
+            {
+                Debug.Log("User logged in successfully: " + username);
+                PrintLoginMessage(username); // Print user login message
+                return true;
+            }
+            else
+            {
+                Debug.LogWarning("Login failed: Incorrect username or password.");
+                return false;
+            }
+        }
+    }
+
+    // Method to display the login message
+    private void PrintLoginMessage(string username)
+    {
+        if (loginMessageText != null)
+        {
+            loginMessageText.text = "Logged in as: " + username; // Display the login message
+        }
+        else
+        {
+            Debug.LogError("LoginMessageText is not assigned.");
+        }
+    }
+
+    private void StartPing(string ipAddress)
+    {
+        StartCoroutine(PingServer(ipAddress));
+    }
+
+    private System.Collections.IEnumerator PingServer(string ipAddress)
+    {
+        while (true)
+        {
+            using (System.Net.NetworkInformation.Ping ping = new System.Net.NetworkInformation.Ping())
+            {
+                PingReply reply = ping.Send(ipAddress);
+                string pingMessage = $"Ping to {ipAddress}: bytes=32 time={reply.RoundtripTime}ms TTL=128"; // Format ping message
+                UpdatePingDisplay(pingMessage); // Update the ping message display
+            }
+
+            yield return new WaitForSeconds(1); // Adjust the interval as needed
+        }
+    }
+
+    private void UpdatePingDisplay(string message)
+    {
+        if (pingMessageText != null)
+        {
+            pingMessageText.text += message + "\n"; // Append ping message with newline
+        }
+        else
+        {
+            Debug.LogError("PingMessageText is not assigned.");
         }
     }
 }
